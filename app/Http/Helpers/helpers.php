@@ -66,18 +66,19 @@ function get_all_countries($item = [])
     return json_decode(json_encode($countries));
 }
 
-function get_country_phone_code($country) {
+function get_country_phone_code($country)
+{
     $countries = json_decode(file_get_contents(resource_path('world/countries.json')), true);
     $phone_code = "";
-    foreach($countries as $item) {
-        if($item['name'] == $country) {
+    foreach ($countries as $item) {
+        if ($item['name'] == $country) {
             $phone_code = $item['phone_code'];
         }
     }
-    if($phone_code == "") {
+    if ($phone_code == "") {
         throw new Exception("Sorry, country (" . $country . ") is not available in our list");
     }
-    $phone_code = str_replace("+","",$phone_code);
+    $phone_code = str_replace("+", "", $phone_code);
     return $phone_code;
 }
 
@@ -147,13 +148,13 @@ function get_files_from_fileholder($request, $file_input_name)
     if ($request->hasFile($file_input_name)) {
         $input_name = $keyword . "-" . $file_input_name;
         $file_name_array = explode(',', $input_name);
-	//dd($request->input_name );
+        //dd($request->input_name );
         foreach ($file_name_array as $item) {
-         // dd($file_name_array );
+            // dd($file_name_array );
             $file_link = $fileholder_stored_file_path . "/" . $item;
-          
+
             if (File::isFile($file_link)) {
-              	 dd($file_link);
+                dd($file_link);
                 array_push($files_link, $file_link);
             } else {
                 throw ValidationException::withMessages([
@@ -172,7 +173,7 @@ function get_files_from_fileholder($request, $file_input_name)
 
 function delete_files_from_fileholder(array $files_link)
 {
-    foreach($files_link as $item) {
+    foreach ($files_link as $item) {
         delete_file($item);
     }
     return true;
@@ -180,7 +181,7 @@ function delete_files_from_fileholder(array $files_link)
 
 function upload_files_from_path_dynamic($files_path, $destination_path, $old_files = null)
 {
-  
+
     $output_files_name = [];
     foreach ($files_path as $path) {
         $file_name      = File::name($path);
@@ -729,7 +730,7 @@ function delete_file($file_link)
 
 function get_default_currency_code($default_currency = null)
 {
-    if($default_currency == null) $default_currency = CurrencyProvider::default();
+    if ($default_currency == null) $default_currency = CurrencyProvider::default();
     if ($default_currency != false) {
         return $default_currency->code;
     }
@@ -862,10 +863,10 @@ function modifyEnv($replace_array = [])
     foreach ($env_content as $key => $value) {
         foreach ($array_going_to_modify as $modify_key => $modify_value) {
             if ($key == $modify_key) {
-                $update_array[$key] = '"'.$modify_value.'"';
+                $update_array[$key] = '"' . $modify_value . '"';
                 break;
             } else {
-                $update_array[$key] = '"'.$value.'"';
+                $update_array[$key] = '"' . $value . '"';
             }
         }
     }
@@ -987,7 +988,7 @@ function auth_admin_incomming_permission()
 {
     $incomming_access = Route::currentRouteName();
     $auth_admin_permissions = auth_admin_permissions();
-    
+
     if (auth_is_super_admin() == true) return true;
     if (!in_array($incomming_access, permission_protected())) return true;
     if (in_array($incomming_access, $auth_admin_permissions)) return true;
@@ -1086,79 +1087,86 @@ function create_file($path, $mode = "w")
 }
 
 
-function get_first_file_from_dir($dir) {
+function get_first_file_from_dir($dir)
+{
     $files = scandir($dir);
-    if(is_array($files) && count($files) > 2) return $files[2];
+    if (is_array($files) && count($files) > 2) return $files[2];
     return false;
 }
 
-function language_file_exists() {
+function language_file_exists()
+{
     $file_path = get_files_path('language-file');
     $files = scandir($file_path);
-    if(is_array($files) && count($files) > 2) return true;
+    if (is_array($files) && count($files) > 2) return true;
     return false;
 }
 
-function get_default_language_code() {
+function get_default_language_code()
+{
     return App::currentLocale();
 }
-function numeric_unit_converter($number) {
+function numeric_unit_converter($number)
+{
     $data['number'] = 0;
     $data['unit'] = "";
-    if($number >= 1000 && $number < 1000000) {
+    if ($number >= 1000 && $number < 1000000) {
         $convert_number = $number / 1000;
-        $data['number'] = (double) $convert_number;
+        $data['number'] = (float) $convert_number;
         $data['unit'] = "K";
-    }else if($number >= 1000000 && $number < 1000000000) {
+    } else if ($number >= 1000000 && $number < 1000000000) {
         $convert_number = $number / 1000000;
-        $data['number'] = (double) $convert_number;
+        $data['number'] = (float) $convert_number;
         $data['unit'] = "M";
-    }else if($number >= 1000000000 && $number < 1000000000000) {
+    } else if ($number >= 1000000000 && $number < 1000000000000) {
         $convert_number = $number / 1000000000;
-        $data['number'] = (double) $convert_number;
+        $data['number'] = (float) $convert_number;
         $data['unit'] = "B";
-    }else if($number >= 1000000000000) {
+    } else if ($number >= 1000000000000) {
         $convert_number = $number / 1000000000000;
-        $data['number'] = (double) $convert_number;
+        $data['number'] = (float) $convert_number;
         $data['unit'] = "T";
-    }else {
+    } else {
         $data['number'] = $number;
         $data['unit'] = "";
     }
     return (object) $data;
 }
-function get_admin($username) {
-    $admin = Admin::where("username",$username)->first();
+function get_admin($username)
+{
+    $admin = Admin::where("username", $username)->first();
     return $admin;
 }
 
-function setPageTitle(string $title) {
+function setPageTitle(string $title)
+{
     $basic_settings = BasicSettingsProvider::get();
     return $basic_settings->site_name . " | " . $title;
 }
 
-function make_username($first_name,$last_name,$table = "users") {
+function make_username($first_name, $last_name, $table = "users")
+{
     // Make username Dynamically
     $generate_name_with_count = "";
-    do{
+    do {
         // Generate username
         $firstName = $first_name;
         $lastName = $last_name;
 
-        if($generate_name_with_count == "") {
-            if(strlen($firstName) >= 6) {
+        if ($generate_name_with_count == "") {
+            if (strlen($firstName) >= 6) {
                 $generate_name = filter_string_lower($firstName);
-            }else {
-                $modfy_last_name = explode(' ',$lastName);
+            } else {
+                $modfy_last_name = explode(' ', $lastName);
                 $lastName = filter_string_lower($modfy_last_name[0]);
                 $firstName = filter_string_lower($firstName);
                 $generate_name = $firstName . $lastName;
-                if(strlen($generate_name) < 6) {
+                if (strlen($generate_name) < 6) {
                     $firstName = filter_string_lower($firstName);
                     $lastName = filter_string_lower($lastName);
                     $generate_name = $firstName . $lastName;
 
-                    if(strlen($generate_name) < 6) {
+                    if (strlen($generate_name) < 6) {
                         $getCurrentLen = strlen($generate_name);
                         $dueChar = 6 - $getCurrentLen;
                         $generate_due_char = strtolower(generate_random_string($dueChar));
@@ -1166,16 +1174,16 @@ function make_username($first_name,$last_name,$table = "users") {
                     }
                 }
             }
-        }else {
+        } else {
             $generate_name = $generate_name_with_count;
         }
-        
-        // Find User is already exists or not
-        $chekUser = DB::table($table)->where('username',$generate_name)->first();
 
-        if($chekUser == null) {
+        // Find User is already exists or not
+        $chekUser = DB::table($table)->where('username', $generate_name)->first();
+
+        if ($chekUser == null) {
             $loop = false;
-        }else {
+        } else {
             $generate_name_with_count = $generate_name;
 
             $split_string = array_reverse(str_split($generate_name_with_count));
@@ -1183,20 +1191,20 @@ function make_username($first_name,$last_name,$table = "users") {
             $last_numeric_values = "";
             $numeric_close = false;
 
-            foreach($split_string as $character) {
-                if($numeric_close == false) {
-                    if(is_numeric($character)) {
+            foreach ($split_string as $character) {
+                if ($numeric_close == false) {
+                    if (is_numeric($character)) {
                         $last_numeric_values .= $character;
-                    }else {
+                    } else {
                         $numeric_close = true;
                     }
                 }
-                if($numeric_close == true) {
+                if ($numeric_close == true) {
                     $username_string_part .= $character;
                 }
             }
 
-            if($last_numeric_values == "") { // If has no number in username string;
+            if ($last_numeric_values == "") { // If has no number in username string;
                 $last_numeric_values = 1;
             }
 
@@ -1205,13 +1213,14 @@ function make_username($first_name,$last_name,$table = "users") {
             $generate_name_with_count = $username_string_part . ($last_numeric_values + 1);
             $loop = true;
         }
-    }while($loop);
+    } while ($loop);
 
     return $generate_name;
 }
 
-function filter_string_lower($string) {
-    $username = preg_replace('/ /i','',$string);
+function filter_string_lower($string)
+{
+    $username = preg_replace('/ /i', '', $string);
     $username = preg_replace('/[^A-Za-z0-9\-]/', '', $username);
     $username = strtolower($username);
     return $username;
@@ -1240,31 +1249,33 @@ function generate_random_string_number($length = 12)
     return $randomString;
 }
 
-function generate_unique_string($table,$column,$length = 10) {
-    do{
-       $generate_rand_string = generate_random_string_number($length);
-       $unique = DB::table($table)->where($column,$generate_rand_string)->exists();
-       $loop = false;
-       if($unique) {
-        $loop = true;
-       }
-       $unique_string = $generate_rand_string;
-    }while($loop);
+function generate_unique_string($table, $column, $length = 10)
+{
+    do {
+        $generate_rand_string = generate_random_string_number($length);
+        $unique = DB::table($table)->where($column, $generate_rand_string)->exists();
+        $loop = false;
+        if ($unique) {
+            $loop = true;
+        }
+        $unique_string = $generate_rand_string;
+    } while ($loop);
 
     return $unique_string;
 }
 
-function upload_file($file,$destination_path,$old_file = null) {
-    if(File::isFile($file)) {
+function upload_file($file, $destination_path, $old_file = null)
+{
+    if (File::isFile($file)) {
         $save_path = get_files_path($destination_path);
         $file_extension = $file->getClientOriginalExtension();
         $file_type = File::mimeType($file);
         $file_size = File::size($file);
         $file_original_name = $file->getClientOriginalName();
 
-        $file_base_name = explode(".",$file_original_name);
+        $file_base_name = explode(".", $file_original_name);
         array_pop($file_base_name);
-        $file_base_name = implode("-",$file_base_name);
+        $file_base_name = implode("-", $file_base_name);
 
         $file_name = Str::uuid() . "." . $file_extension;
 
@@ -1282,18 +1293,18 @@ function upload_file($file,$destination_path,$old_file = null) {
             'original_base_name'    => $file_base_name,
         ];
 
-        try{
+        try {
 
-            if($old_file) {
+            if ($old_file) {
                 $old_file_link = $save_path . "/" . $old_file;
                 delete_file($old_file_link);
             }
 
-            File::move($file,$file_public_link);
-        }catch(Exception $e) {
+            File::move($file, $file_public_link);
+        } catch (Exception $e) {
             return false;
         }
-        
+
         return $file_info;
     }
 
@@ -1301,9 +1312,9 @@ function upload_file($file,$destination_path,$old_file = null) {
 }
 
 function delete_files($files_link)
-{   
-    if(is_array($files_link)) {
-        foreach($files_link as $item) {
+{
+    if (is_array($files_link)) {
+        foreach ($files_link as $item) {
             if (File::exists($item)) {
                 try {
                     File::delete($item);
@@ -1315,32 +1326,37 @@ function delete_files($files_link)
     }
 }
 
-function support_ticket_const() {
+function support_ticket_const()
+{
     return SupportTicketConst::class;
 }
 
-function get_percentage_from_two_number($total,$available,$result_type = "int") {
-    if(is_numeric($total) && is_numeric($available)) {
+function get_percentage_from_two_number($total, $available, $result_type = "int")
+{
+    if (is_numeric($total) && is_numeric($available)) {
         $one_percent = $total / 100;
         $result = 0;
-        if($one_percent > 0) $result = $available / $one_percent;
-        if($result_type == "int") return (int) ceil($result);
+        if ($one_percent > 0) $result = $available / $one_percent;
+        if ($result_type == "int") return (int) ceil($result);
         return number_format($result, 2, ".", ",");
     }
 }
 
-function remove_speacial_char($string) {
-    return preg_replace("/[^A-Za-z0-9]/","",$string);
+function remove_speacial_char($string)
+{
+    return preg_replace("/[^A-Za-z0-9]/", "", $string);
 }
 
-function check_email($string) {
-    if(filter_var($string,FILTER_VALIDATE_EMAIL)) {
+function check_email($string)
+{
+    if (filter_var($string, FILTER_VALIDATE_EMAIL)) {
         return true;
     }
     return false;
 }
 
-function generate_random_code($length = 6) {
+function generate_random_code($length = 6)
+{
     $numbers = '123456789';
     $numbersLength = strlen($numbers);
     $randNumber = '';
@@ -1350,91 +1366,102 @@ function generate_random_code($length = 6) {
     return $randNumber;
 }
 
-function mailVerificationTemplate($user) {
+function mailVerificationTemplate($user)
+{
     $data = [
         'user_id'       => $user->id,
         'code'          => generate_random_code(),
-        'token'         => generate_unique_string("user_authorizations","token",200),
+        'token'         => generate_unique_string("user_authorizations", "token", 200),
         'created_at'    => now(),
     ];
 
     DB::beginTransaction();
-    try{
-        UserAuthorization::where("user_id",$user->id)->delete();
+    try {
+        UserAuthorization::where("user_id", $user->id)->delete();
         DB::table("user_authorizations")->insert($data);
         $user->notify(new SendAuthorizationCode((object) $data));
         DB::commit();
-    }catch(Exception $e) {
+    } catch (Exception $e) {
         DB::rollBack();
         return back()->with(['error' => ['Something went wrong! Please try again']]);
     }
 
-    return redirect()->route('user.authorize.mail',$data['token'])->with(['warning' => ['Please verify your mail address. Check your mail inbox to get verification code']]);
+    return redirect()->route('user.authorize.mail', $data['token'])->with(['warning' => ['Please verify your mail address. Check your mail inbox to get verification code']]);
 }
 
-function extension_const() {
+function extension_const()
+{
     return ExtensionConst::class;
 }
 
-function global_const() {
+function global_const()
+{
     return GlobalConst::class;
 }
 
-function imageExtenstions() {
-    return ['png','jpg','jpeg','svg','webp','gif'];
+function imageExtenstions()
+{
+    return ['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif'];
 }
 
-function its_image(string $string) {
-    if(!is_string($string)) return false;
-    $extension = explode(".",$string);
+function its_image(string $string)
+{
+    if (!is_string($string)) return false;
+    $extension = explode(".", $string);
     $extension = strtolower(end($extension));
-    if(in_array($extension,imageExtenstions())) return true;
+    if (in_array($extension, imageExtenstions())) return true;
     return false;
 }
 
-function get_file_link($path_source, $name = null) {
-    if($name == null) return false;
+function get_file_link($path_source, $name = null)
+{
+    if ($name == null) return false;
     $path = files_asset_path($path_source);
     $link = $path . "/" . $name;
     $dev_link = get_files_path($path_source) . "/" . $name;
-    if(is_file($dev_link)) return $link;
+    if (is_file($dev_link)) return $link;
     return false;
 }
 
-function get_file_basename_ext_from_link(string $link) {
+function get_file_basename_ext_from_link(string $link)
+{
     $link = $link;
-    $file_name = explode("/",$link);
+    $file_name = explode("/", $link);
     $file_name = end($file_name);
-    $file_base = explode(".",$file_name);
+    $file_base = explode(".", $file_name);
     $extension = end($file_base);
     array_pop($file_base);
-    $file_base = implode(".",$file_base);
+    $file_base = implode(".", $file_base);
     return (object) ['base_name' => $file_base, 'extension' => $extension];
 }
 
-function payment_gateway_const() {
+function payment_gateway_const()
+{
     return PaymentGatewayConst::class;
 }
 
 
-function get_auth_guard() {
-    if(auth()->guard("web")->check()) {
+function get_auth_guard()
+{
+    if (auth()->guard("web")->check()) {
         return "web";
-    }else if(auth()->guard("admin")->check()) {
+    } else if (auth()->guard("admin")->check()) {
         return "admin";
-    }else if(auth()->guard("api")->check()) {
+    } else if (auth()->guard("api")->check()) {
         return "api";
-    }else{
+    } else {
         return "";
     }
 }
 
-function files_asset_path_basename($slug) {
+function files_asset_path_basename($slug)
+{
     return "public/" . files_path($slug)->path;
 }
 
-function get_only_numeric_data($string) {
-    return preg_replace("/[^0-9]/","",$string);
+function get_only_numeric_data($string)
+{
+    return preg_replace("/[^0-9]/", "", $string);
 }
 function get_files_public_path($slug)
 {
@@ -1442,7 +1469,8 @@ function get_files_public_path($slug)
     return "public/" . $files_path;
 }
 if (!function_exists('formatNumberInKNotation')) {
-    function formatNumberInKNotation (Int $number, Int $decimals = 1) : String {
+    function formatNumberInKNotation(Int $number, Int $decimals = 1): String
+    {
         # Define the unit size and supported units.
         $unitSize = 1000;
         $units = ["", "K", "M", "B", "T"];
@@ -1463,43 +1491,45 @@ if (!function_exists('formatNumberInKNotation')) {
     }
 }
 
-function remove_special_char($string,$replace_string = "") {
-    return preg_replace("/[^A-Za-z0-9]/",$replace_string,$string);
+function remove_special_char($string, $replace_string = "")
+{
+    return preg_replace("/[^A-Za-z0-9]/", $replace_string, $string);
 }
 
-function get_api_languages(){
-    $lang = Language::get()->map(function($data,$index){
-        if(file_exists(base_path('lang/') . $data->code . '.json') == false) return false;
-        $json = json_decode(file_get_contents(base_path('lang/') . $data->code . '.json'),true);
+function get_api_languages()
+{
+    $lang = Language::get()->map(function ($data, $index) {
+        if (file_exists(base_path('lang/') . $data->code . '.json') == false) return false;
+        $json = json_decode(file_get_contents(base_path('lang/') . $data->code . '.json'), true);
         $lan_key_values = [];
-        if($json != null) {
-            foreach($json as $lan_key=>$item) {
+        if ($json != null) {
+            foreach ($json as $lan_key => $item) {
                 $lan_key_original = $lan_key;
-                $lan_key = preg_replace('/[^A-Za-z]/i',' ',strtolower($lan_key));
-                if(strlen($lan_key) > 30) {
+                $lan_key = preg_replace('/[^A-Za-z]/i', ' ', strtolower($lan_key));
+                if (strlen($lan_key) > 30) {
                     // $lan_key = substr($lan_key,0,20);
-                    $word_array = explode(" ",$lan_key);
+                    $word_array = explode(" ", $lan_key);
                     $count_char = 0;
-                    foreach($word_array as $word_key => $word) {
+                    foreach ($word_array as $word_key => $word) {
                         $count_char += strlen($word);
-                        if($count_char > 30) {
-                            $get_limit_val = array_splice($word_array,0,$word_key);
-                            $lan_key = implode(" ",$get_limit_val);
+                        if ($count_char > 30) {
+                            $get_limit_val = array_splice($word_array, 0, $word_key);
+                            $lan_key = implode(" ", $get_limit_val);
                             $count_char = 0;
                             break;
                         }
                     }
                 }
                 // Make Key Readable
-                $var_array = explode(" ",$lan_key);
-                foreach($var_array as $key=>$var) {
-                    if($key > 0) {
+                $var_array = explode(" ", $lan_key);
+                foreach ($var_array as $key => $var) {
+                    if ($key > 0) {
                         $var_array[$key] = ucwords($var);
                     }
                 }
-                $lan_key = implode("",$var_array);
+                $lan_key = implode("", $var_array);
                 // dd($data->name);
-                if(array_key_exists($lan_key,$lan_key_values) && $lan_key_values[$lan_key] != $item) {
+                if (array_key_exists($lan_key, $lan_key_values) && $lan_key_values[$lan_key] != $item) {
                     throw new Exception("Duplicate Key Found! Please check/update this key [$lan_key_original]");
                 }
                 ($lan_key != "") ? $lan_key_values[$lan_key] = $item : "";
@@ -1510,14 +1540,15 @@ function get_api_languages(){
             'code'                  => $data->code,
             'status'                => $data->status,
             'dir'                   => $data->dir,
-            'translate_key_values'  =>$lan_key_values,
+            'translate_key_values'  => $lan_key_values,
         ];
-    })->reject(function($value) {
+    })->reject(function ($value) {
         return $value == false;
     });
-    return $lang;
+    return $lang->values()->all();
 }
 
-function get_default_language_dir() {
+function get_default_language_dir()
+{
     return session()->get('local_dir') ?? "ltr";
 }
