@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use Exception;
 use App\Models\Admin\Week;
 use App\Models\Admin\Doctor;
@@ -23,13 +24,14 @@ class DoctorCareController extends Controller
      * Method for show doctor-care index page
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function index(){
+     */
+    public function index()
+    {
 
         $page_title = "Doctors";
         $doctors    = Doctor::get();
 
-        return view('admin.sections.doctor-care.index',compact(
+        return view('admin.sections.doctor-care.index', compact(
             'page_title',
             'doctors'
         ));
@@ -38,20 +40,21 @@ class DoctorCareController extends Controller
      * Method for show doctor-care create page
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function create(){
+     */
+    public function create()
+    {
 
         $page_title      = "Doctor Create";
         $weeks           = Week::get();
-        $hospital_branch = HospitalBranch::orderBy('name','ASC')->get();
+        $hospital_branch = HospitalBranch::orderBy('name', 'ASC')->get();
         // $doctor          = Doctor::
 
 
-        return view('admin.sections.doctor-care.create',compact(
+        return view('admin.sections.doctor-care.create', compact(
             'page_title',
             'hospital_branch',
             'weeks',
-         
+
         ));
     }
     /**
@@ -59,40 +62,43 @@ class DoctorCareController extends Controller
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
      */
-    public function getBranchDepartments(Request $request) {
+    public function getBranchDepartments(Request $request)
+    {
 
-        $validator    = Validator::make($request->all(),[
-            'branch'  => 'required|integer',           
+        $validator    = Validator::make($request->all(), [
+            'branch'  => 'required|integer',
         ]);
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return Response::error($validator->errors()->all());
         }
 
-        $branch  = HospitalBranch::with(['departments' => function($department) {
+        $branch  = HospitalBranch::with(['departments' => function ($department) {
             $department->with(['department']);
         }])->find($request->branch);
-        if(!$branch) return Response::error(['Branch Not Found'],404);
+        if (!$branch) return Response::error(['Branch Not Found'], 404);
 
-        return Response::success(['Data fetch successfully'],['branch' => $branch],200);
+        return Response::success(['Data fetch successfully'], ['branch' => $branch], 200);
     }
     /**
      * Method for show all days 
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
      */
-    public function getScheduleDays(){
+    public function getScheduleDays()
+    {
 
         $weeks       = Week::get();
-        return view('admin.components.doctor-care.schedule-item',compact('weeks'));
+        return view('admin.components.doctor-care.schedule-item', compact('weeks'));
     }
     /**
      * Method for store doctor
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function store(Request $request){
+     */
+    public function store(Request $request)
+    {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'branch'           => 'required',
             'department'       => 'required',
             'name'             => 'required|string|max:50',
@@ -127,28 +133,28 @@ class DoctorCareController extends Controller
         $validated['hospital_branch_id']        = $validated['branch'];
         $validated['hospital_department_id']    = $validated['department'];
 
-        if(Doctor::where('hospital_branch_id',$validated['hospital_branch_id'])->where('hospital_department_id',$validated['hospital_department_id'])->where('contact',$validated['contact'])->exists()){
+        if (Doctor::where('hospital_branch_id', $validated['hospital_branch_id'])->where('hospital_department_id', $validated['hospital_department_id'])->where('contact', $validated['contact'])->exists()) {
             throw ValidationException::withMessages([
                 'name'  => "Doctor already exists!",
             ]);
         }
 
-        $validated['language']    = implode(",",$validated['language']);
-        if($request->hasFile("image")){
-            $validated['image'] = $this->imageValidate($request,"image",null);
+        $validated['language']    = implode(",", $validated['language']);
+        if ($request->hasFile("image")) {
+            $validated['image'] = $this->imageValidate($request, "image", null);
         }
 
         $shedule_days   = $validated['schedule_day'];
         $from_time      = $validated['from_time'];
         $to_time        = $validated['to_time'];
         $max_patient    = $validated['max_patient'];
-        $validated      = Arr::except($validated,['schedule_day','from_time','to_time','max_patient','branch','department']);
-        
-        try{
+        $validated      = Arr::except($validated, ['schedule_day', 'from_time', 'to_time', 'max_patient', 'branch', 'department']);
+
+        try {
             $doctor = Doctor::create($validated);
-            if(count($shedule_days) > 0){
+            if (count($shedule_days) > 0) {
                 $days_shedule = [];
-                foreach($shedule_days as $key => $day_id){
+                foreach ($shedule_days as $key => $day_id) {
                     $days_shedule[] = [
                         'doctor_id'   => $doctor->id,
                         'week_id'     => $day_id,
@@ -160,8 +166,7 @@ class DoctorCareController extends Controller
                 }
                 DoctorHasSchedule::insert($days_shedule);
             }
-
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return back()->with(['error' => ["Something went wrong.Please try again."]]);
         }
         return redirect()->route('admin.doctor.care.index')->with(['success' => ["Doctor Created Successfully!"]]);
@@ -171,15 +176,16 @@ class DoctorCareController extends Controller
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
      */
-    public function statusUpdate(Request $request){
+    public function statusUpdate(Request $request)
+    {
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'data_target'  => 'required|numeric|exists:doctors,id',
             'status'       => 'required|boolean',
         ]);
 
-        if($validator->fails()){
-            $errors = ['error' => $validator->errors() ];
+        if ($validator->fails()) {
+            $errors = ['error' => $validator->errors()];
             return Response::error($errors);
         }
 
@@ -188,11 +194,11 @@ class DoctorCareController extends Controller
 
         try {
             $doctors->update([
-                'status'   => ($validated['status']) ? false: true,
+                'status'   => ($validated['status']) ? false : true,
             ]);
         } catch (Exception $e) {
-            $errors = ['error' => ['Something went wrong! Please try again.'] ];
-            return Response::error($errors,null,500);
+            $errors = ['error' => ['Something went wrong! Please try again.']];
+            return Response::error($errors, null, 500);
         }
         $success = ['success' => ['Doctor status updated successfully!']];
         return Response::success($success);
@@ -201,18 +207,19 @@ class DoctorCareController extends Controller
      * Method for show doctor edit page
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function edit($id){
+     */
+    public function edit($id)
+    {
         $page_title          = "Doctor Edit";
         $doctors             = Doctor::find($id);
-        if(!$doctors) return back()->with(['error' => ["Doctor Does not exists"]]);
+        if (!$doctors) return back()->with(['error' => ["Doctor Does not exists"]]);
 
-        $hospital_branch     = HospitalBranch::where('status',true)->orderBy('name','ASC')->get();
-        $hospital_department = HospitalDepartment::where('status',true)->get();
+        $hospital_branch     = HospitalBranch::where('status', true)->orderBy('name', 'ASC')->get();
+        $hospital_department = HospitalDepartment::where('status', true)->get();
         $weeks               = Week::get();
-        $doctor_has_schedule = DoctorHasSchedule::where('doctor_id',$id)->get();
+        $doctor_has_schedule = DoctorHasSchedule::where('doctor_id', $id)->get();
 
-        return view('admin.sections.doctor-care.edit',compact(
+        return view('admin.sections.doctor-care.edit', compact(
             'page_title',
             'doctors',
             'hospital_branch',
@@ -225,11 +232,12 @@ class DoctorCareController extends Controller
      * Method for update doctor 
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function update(Request $request,$id){
+     */
+    public function update(Request $request, $id)
+    {
 
         $doctor    = Doctor::find($id);
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'branch'            => 'required',
             'department'        => 'required',
             'name'              => 'required|string',
@@ -255,8 +263,8 @@ class DoctorCareController extends Controller
             'max_patient.*'     => 'required|integer',
             'image'             => 'nullable'
         ]);
-      
-        if($validator->fails()){
+
+        if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
@@ -264,29 +272,29 @@ class DoctorCareController extends Controller
         $validated['slug']                    = Str::uuid();
         $validated['hospital_branch_id']      = $validated['branch'];
         $validated['hospital_department_id']  = $validated['department'];
-        
-        if(Doctor::whereNot('id',$doctor->id)->where('hospital_branch_id',$validated['hospital_branch_id'])->where('hospital_department_id',$validated['hospital_department_id'])->where('contact',$validated['contact'])->exists()){
+
+        if (Doctor::whereNot('id', $doctor->id)->where('hospital_branch_id', $validated['hospital_branch_id'])->where('hospital_department_id', $validated['hospital_department_id'])->where('contact', $validated['contact'])->exists()) {
             throw ValidationException::withMessages([
                 'name' => "Doctor already exists!",
             ]);
         }
-        $validated['language'] = implode(',',$validated['language']);
-        if($request->hasFile('image')){
-            $validated['image']  =  $this->imageValidate($request,"image",null);
+        $validated['language'] = implode(',', $validated['language']);
+        if ($request->hasFile('image')) {
+            $validated['image']  =  $this->imageValidate($request, "image", null);
         }
         $schedule_days     = $validated['schedule_day'];
         $from_time         = $validated['from_time'];
         $to_time           = $validated['to_time'];
         $max_patient       = $validated['max_patient'];
-        $validated         = Arr::except($validated,['schedule_day','from_time','to_time','max_patient','branch','department']);
-        try{
+        $validated         = Arr::except($validated, ['schedule_day', 'from_time', 'to_time', 'max_patient', 'branch', 'department']);
+        try {
             $doctor_schedule_ids = $doctor->schedules->pluck('id');
-            DoctorHasSchedule::whereIn('id',$doctor_schedule_ids)->delete();
+            DoctorHasSchedule::whereIn('id', $doctor_schedule_ids)->delete();
 
             $doctor->update($validated);
-            if(count($schedule_days) > 0){
+            if (count($schedule_days) > 0) {
                 $days_schedule = [];
-                foreach($schedule_days as $key => $day_id){
+                foreach ($schedule_days as $key => $day_id) {
                     $days_schedule[]  = [
                         'doctor_id'   => $doctor->id,
                         'week_id'     => $day_id,
@@ -298,8 +306,7 @@ class DoctorCareController extends Controller
                 }
                 DoctorHasSchedule::insert($days_schedule);
             }
-
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return back()->with(['error'  => ['Something went wrong! Please try again.']]);
         }
         return redirect()->route('admin.doctor.care.index')->with(['success' => ['Doctor Updated Successfully!']]);
@@ -308,8 +315,9 @@ class DoctorCareController extends Controller
      * Method for delete doctor
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function delete(request $request){
+     */
+    public function delete(request $request)
+    {
         $request->validate([
             'target'    => 'required|numeric',
         ]);
@@ -327,15 +335,16 @@ class DoctorCareController extends Controller
      * Method for image validate
      * @param string $slug
      * @param \Illuminate\Http\Request  $request
-    */
-    public function imageValidate($request,$input_name,$old_image = null) {
-        if($request->hasFile($input_name)) {
-            $image_validated = Validator::make($request->only($input_name),[
+     */
+    public function imageValidate($request, $input_name, $old_image = null)
+    {
+        if ($request->hasFile($input_name)) {
+            $image_validated = Validator::make($request->only($input_name), [
                 $input_name         => "image|mimes:png,jpg,webp,jpeg,svg",
             ])->validate();
 
-            $image = get_files_from_fileholder($request,$input_name);
-            $upload = upload_files_from_path_dynamic($image,'site-section',$old_image);
+            $image = get_files_from_fileholder($request, $input_name);
+            $upload = upload_files_from_path_dynamic($image, 'site-section', $old_image);
             return $upload;
         }
         return false;

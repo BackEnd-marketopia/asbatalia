@@ -16,9 +16,9 @@ class SetupPageSeeder extends Seeder
      */
     public function run()
     {
-        $pages =  ["Home" => "/","Find" => "/find-doctors","About" => "/about","Faq" => "/faq","Web Journal" => "journals","Contact" => "/contact"];
+        $pages =  ["Home" => "/", "Find" => "/find-doctors", "About" => "/about", "Faq" => "/faq", "Web Journal" => "journals", "Contact" => "/contact"];
         $data = [];
-        foreach($pages as $item => $url) {
+        foreach ($pages as $item => $url) {
             $data[] = [
                 'slug'          => Str::slug($item),
                 'title'         => $item,
@@ -26,8 +26,13 @@ class SetupPageSeeder extends Seeder
                 'last_edit_by'  => 1,
                 'created_at'    => now(),
             ];
-        }   
+        }
 
-        SetupPage::insert($data);
+        foreach ($data as $page) {
+            SetupPage::updateOrCreate(
+                ['slug' => $page['slug']],
+                $page
+            );
+        }
     }
 }
